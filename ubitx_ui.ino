@@ -1,4 +1,4 @@
-/**
+/* 
  * The user interface of the ubitx consists of the encoder, the push-button on top of it
  * and the 16x2 LCD display.
  * The upper line of the display is constantly used to display frequency and status
@@ -7,11 +7,10 @@
  */
 
 //returns true if the button is pressed
-int btnDown(){
+int hwBtnDown(){
   if (digitalRead(FBUTTON) == HIGH)
     return 0;
-  else
-    return 1;
+  return 1;
 }
 
 /**
@@ -134,11 +133,9 @@ void updateDisplay() {
     else
       strcat(c, "B:");
   }
-
-
-
+  
   //one mhz digit if less than 10 M, two digits if more
-  if (frequency < 10000000l){
+  if (frequency < 10000000L){
     c[6] = ' ';
     c[7]  = b[0];
     strcat(c, ".");
@@ -157,6 +154,15 @@ void updateDisplay() {
   if (inTx)
     strcat(c, " TX");
   printLine(1, c);
+
+  if (!menuOn) {
+    //now, the second line
+    memset(c, 0, sizeof(c)); 
+    strcat(c, Bands[currentBandIndex].Text); 
+    strcat(c, " ");
+    strcat(c, Steps[currentFreqStepIndex].Text); 
+    printLine2(c);
+  }
 
 /*
   //now, the second line

@@ -1,12 +1,12 @@
-
+ 
 /**
  * This procedure is only for those who have a signal generator/transceiver tuned to exactly 7.150 and a dummy load 
  */
 
 void btnWaitForClick(){
-  while(!btnDown())
+  while(!btnDown(BUTTON_HW))
     active_delay(50);
-  while(btnDown())
+  while(btnDown(BUTTON_HW))
     active_delay(50);
  active_delay(50);
 }
@@ -22,76 +22,77 @@ void btnWaitForClick(){
  */
 
 
-void factory_alignment(){
+void factory_alignment(int btn){
         
-  calibrateClock();
+  calibrateClock(btn);
 
   if (calibration == 0){
-    printLine2("Setup Aborted");
+    printLine2((char *)F("Setup Aborted"));
     return;
   }
 
   //move it away to 7.160 for an LSB signal
-  setFrequency(7170000l);
+  setFrequency(7170000L);
   updateDisplay();
-  printLine2("#2 BFO");
+  printLine2((char *)F("#2 BFO"));
   active_delay(1000);
 
   usbCarrier = 11994999l;
   menuSetupCarrier(1);
 
-  if (usbCarrier == 11994999l){
-    printLine2("Setup Aborted");
+  if (usbCarrier == 11994999L){
+    printLine2((char *)F("Setup Aborted"));
     return;
   }
+
   
-  printLine2("#3:Test 3.5MHz");
+  printLine2((char *)F("#3:Test 3.5MHz"));
   isUSB = false;
-  setFrequency(3500000l);
+  setFrequency(3500000L);
   updateDisplay();
 
-  while (!btnDown()){
+  while (!btnDown(btn)){
     checkPTT();
     active_delay(100);
   }
 
   btnWaitForClick();
-  printLine2("#4:Test 7MHz");
+  printLine2((char *)F("#4:Test 7MHz"));
 
-  setFrequency(7150000l);
+  setFrequency(7150000L);
   updateDisplay();
-  while (!btnDown()){
+  while (!btnDown(btn)){
     checkPTT();
     active_delay(100);
   }
 
   btnWaitForClick();
-  printLine2("#5:Test 14MHz");
+  printLine2((char *)F("#5:Test 14MHz"));
 
   isUSB = true;
-  setFrequency(14000000l);
+  setFrequency(14000000L);
   updateDisplay();
-  while (!btnDown()){
+  while (!btnDown(btn)){
     checkPTT();
     active_delay(100);
   }
 
   btnWaitForClick();
-  printLine2("#6:Test 28MHz");
+  printLine2((char *)F("#6:Test 28MHz"));
 
-  setFrequency(28000000l);
+  setFrequency(28000000L);
   updateDisplay();
-  while (!btnDown()){
+  while (!btnDown(btn)){
     checkPTT();
     active_delay(100);
   }
 
-  printLine2("Alignment done");
+  printLine2((char *)F("Alignment done"));
   active_delay(1000);
 
   isUSB = false;
-  setFrequency(7150000l);
+  setFrequency(7150000L);
   updateDisplay();  
   
-}
+} 
 

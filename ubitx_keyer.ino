@@ -41,7 +41,7 @@ byte delayBeforeCWStartTime = 50;
 
 
 // in milliseconds, this is the parameter that determines how long the tx will hold between cw key downs
-//#define CW_TIMEOUT (600l)   //Change to CW Delaytime for value save to eeprom
+//#define CW_TIMEOUT (600L)   //Change to CW Delaytime for value save to eeprom
 #define PADDLE_DOT 1
 #define PADDLE_DASH 2
 #define PADDLE_BOTH 3
