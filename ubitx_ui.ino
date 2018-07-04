@@ -103,6 +103,23 @@ void printLine2(char *c){
   printLine(0,c);
 }
 
+
+char flashBuff[31];
+
+//  short cut to print to the first line
+void printLine1(const __FlashStringHelper *c){
+  strcpy_P(flashBuff, (char *)c );
+  printLine(1, flashBuff);
+}
+
+//  short cut to print to the first line
+void printLine2(const __FlashStringHelper *c){
+  strcpy_P(flashBuff, (char *)c );
+  printLine(0, flashBuff);
+}
+
+
+ 
 // this builds up the top line of the display with frequency and mode
 void updateDisplay() {
   // tks Jack Purdum W8TEE
@@ -115,23 +132,23 @@ void updateDisplay() {
 
   if (inTx){
     if (cwTimeout > 0)
-      strcpy(c, "   CW:");
+      strcpy_P(c, (char *)F("   CW:"));
     else
-      strcpy(c, "   TX:");
+      strcpy_P(c, (char *)F("   TX:"));
   }
   else {
     if (ritOn)
       strcpy(c, "RIT ");
     else {
       if (isUSB)
-        strcpy(c, "USB ");
+        strcpy_P(c, (char *)F("USB "));
       else
-        strcpy(c, "LSB ");
+        strcpy_P(c, (char *)F("LSB "));
     }
     if (vfoActive == VFO_A) // VFO A is active
-      strcat(c, "A:");
+      strcat_P(c, (char *)F("A:"));
     else
-      strcat(c, "B:");
+      strcat_P(c, (char *)F("B:"));
   }
   
   //one mhz digit if less than 10 M, two digits if more
@@ -152,7 +169,7 @@ void updateDisplay() {
   }
 
   if (inTx)
-    strcat(c, " TX");
+    strcat_P(c, (char *)F(" TX"));
   printLine(1, c);
 
   if (!menuOn) {

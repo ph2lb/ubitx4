@@ -148,7 +148,7 @@ int count = 0;          //to generally count ticks, loops, etc
 
 // PH2LB mods
 #define VFO_A_BAND 512  
-#define VFO_B_BAND 513  
+#define VFO_B_BAND 513
 
 #define VFO_A_STEP 514  
 #define VFO_B_STEP 515  
@@ -233,7 +233,7 @@ typedef enum
 //these are the two default USB and LSB frequencies. The best frequencies depend upon your individual taste and filter shape
 #define INIT_USB_FREQ   (11996500L)
 // limits the tuning and working range of the ubitx between 3 MHz and 30 MHz
-#define LOWEST_FREQ   (100000L)
+#define LOWEST_FREQ   (1000000L)
 #define HIGHEST_FREQ (30000000L)
 
 //we directly generate the CW by programmin the Si5351 to the cw tx frequency, hence, both are different modes
@@ -248,13 +248,13 @@ unsigned long sideTone=800, usbCarrier;
 
 unsigned long vfoA=7150000L, vfoB=14200000L;
 
-int currentBandIndexVfoA = (int)B40M;  
-int currentBandIndexVfoB = (int)B20M;  
-int currentFreqStepIndexVfoA = (int)S100;
-int currentFreqStepIndexVfoB = (int)S100;
+int8_t currentBandIndexVfoA = (int8_t)B40M;  
+int8_t currentBandIndexVfoB = (int8_t)B20M;  
+int8_t currentFreqStepIndexVfoA = (int8_t)S100;
+int8_t currentFreqStepIndexVfoB = (int8_t)S100;
 
-int currentBandIndex = currentBandIndexVfoA;
-int currentFreqStepIndex = currentFreqStepIndexVfoA;
+int8_t currentBandIndex = currentBandIndexVfoA;
+int8_t currentFreqStepIndex = currentFreqStepIndexVfoA;
 
 char isUsbVfoA=0, isUsbVfoB=1;
 unsigned long frequency, ritRxFrequency, ritTxFrequency;  //frequency is the current frequency on the dial
@@ -585,8 +585,8 @@ void doRIT(){
  * variables.
  */
 void initSettings(){
-  byte x;
-  int i;
+  byte x; 
+  int8_t i8;
   //read the settings from the eeprom and restore them
   //if the readings are off, then set defaults
   EEPROM.get(MASTER_CAL, calibration);
@@ -596,19 +596,20 @@ void initSettings(){
   EEPROM.get(CW_SIDETONE, sideTone);
   EEPROM.get(CW_SPEED, cwSpeed);
 
-  EEPROM.get(VFO_A_BAND, i);
-  if (i <= (int)BANDMAX)
-    currentBandIndexVfoA = i;
-  EEPROM.get(VFO_B_BAND, i);
-  if (i <= (int)BANDMAX)
-    currentBandIndexVfoB = i;
-  EEPROM.get(VFO_A_STEP, currentFreqStepIndexVfoA);
-   if (i <= (int)STEPMAX)
-    currentFreqStepIndexVfoA = i;
-  EEPROM.get(VFO_B_STEP, currentFreqStepIndexVfoB);
-  if (i <= (int)STEPMAX)
-    currentFreqStepIndexVfoB = i;
+  EEPROM.get(VFO_A_BAND, i8); 
+  if (i8 >= (byte)BANDMIN && i8<= (byte)BANDMAX)
+    currentBandIndexVfoA = i8;
+  EEPROM.get(VFO_B_BAND, i8); 
+  if (i8 >= (byte)BANDMIN && i8 <= (byte)BANDMAX)
+    currentBandIndexVfoB = i8;
     
+  EEPROM.get(VFO_A_STEP, i8);  
+  if (i8 >= (byte)STEPMIN && i8<= (byte)STEPMAX)
+    currentFreqStepIndexVfoA = i8;
+  EEPROM.get(VFO_B_STEP, i8); 
+  if (i8 >= (byte)STEPMIN && i8 <= (byte)STEPMAX)
+    currentFreqStepIndexVfoB = i8; 
+   
   if (usbCarrier > 12000000L || usbCarrier < 11990000L)
     usbCarrier = 11997000L;
   if (vfoA > 35000000L || 3500000L > vfoA)
@@ -719,17 +720,25 @@ void setup()
 
   //we print this line so this shows up even if the raduino 
   //crashes later in the code
-  printLine2((char*)F("uBITX v4.3")); 
-  //active_delay(500);
+  printLine2(F("uBITX v4.3 PH2LB")); 
+  active_delay(1500);
 
 //  initMeter(); //not used in this build
   initSettings();
   initPorts();     
   initOscillators();
-
+ 
+  vfoActive = VFO_A;
   frequency = vfoA;
-  setFrequency(vfoA);
-  updateDisplay();
+  isUSB = isUsbVfoA;
+  currentBandIndex = currentBandIndexVfoA;
+  currentFreqStepIndex = currentFreqStepIndexVfoA;
+      
+  setFrequency(frequency);
+  setCurrentBandFrequency(frequency);
+   
+  updateDisplay(); 
+  
   if (getButton() == BUTTON_HW)
     factory_alignment(BUTTON_HW);
 }

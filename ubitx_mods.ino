@@ -120,10 +120,10 @@ int menuStep(int btn){
   int knob = 0;
   
   if (!btn){
-   printLine2((char *)F("Step Select?"));
+   printLine2(F("Step Select?"));
    return;
   }
-  printLine2((char *)F("Press to confirm"));
+  printLine2(F("Press to confirm"));
   //wait for the button menu select button to be lifted)
   while (btnDown(btn))
     delay(50);
@@ -154,8 +154,8 @@ int menuStep(int btn){
     delay(100);
   }
  
-  updateDisplay();
   menuOn = 0;
+  updateDisplay(); 
 }
 
 int menuStepUp(int btn){
@@ -166,10 +166,10 @@ int menuStepUp(int btn){
   
    if (currentFreqStepIndex < STEPMAX) {
       currentFreqStepIndex++;             
-   }
+   } 
      
-  updateDisplay();
   menuOn = 0;
+  updateDisplay(); 
 }
 
 
@@ -182,9 +182,9 @@ int menuStepDown(int btn){
   if (currentFreqStepIndex > STEPMIN) {
     currentFreqStepIndex--;        
   }
-     
-  updateDisplay();
+ 
   menuOn = 0;
+  updateDisplay(); 
 }
 
  /*
@@ -240,12 +240,16 @@ int menuBandUp(int btn){
   delay(50);     
   
   if (currentBandIndex < BANDMAX) {
-    currentBandIndex++;     
-    setFrequency(Bands[currentBandIndex].Freq);        
+    currentBandIndex++;   
+    setFrequency(Bands[currentBandIndex].Freq);   
+    if (Bands[currentBandIndex].Freq > 10000000L)
+      isUSB = true;
+    else
+      isUSB = false;     
   }
  
-  updateDisplay();
   menuOn = 0;
+  updateDisplay(); 
 }
 
 
@@ -256,11 +260,15 @@ int menuBandDown(int btn){
   delay(50);     
   
   if (currentBandIndex > BANDMIN) {
-    currentBandIndex--;        
+    currentBandIndex--;         
     setFrequency(Bands[currentBandIndex].Freq);
+    if (Bands[currentBandIndex].Freq > 10000000L)
+      isUSB = true;
+    else
+      isUSB = false; 
   }
      
-  updateDisplay();
   menuOn = 0;
+  updateDisplay();
 }
 
