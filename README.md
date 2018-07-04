@@ -1,6 +1,6 @@
-PH2LB playground for the :
+PH2LB's playground for the : uBITX V4 firmware, written for the Raduino/Arduino control of uBITX trancievers
 
-uBITX V4 firmware, written for the Raduino/Arduino control of uBITX trancievers
+My project info + mods : www.ph2lb.nl/blog/index.php?page=ubitx-mods
 
 Copyright (C) 2017-2018, Ashhar Farhan
 
