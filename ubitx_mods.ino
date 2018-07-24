@@ -1,6 +1,73 @@
 /*
  * Mods by PH2LB 
+ *  
+ * Revision 4.3.3
+ * - Used A7 for s-meter readout 
+ *   adding AGC to my uBiX and used A7 for S meter reading
+ *   hardware mod : www.ph2lb.nl/blog/index.php?page=ubitx-mods2#ubitx-mod9
+ * - Used button5 for 'FAST' step (step *= 5)
+ *  
+ * Revision 4.3.2
+ * - Fixed F() bug added EPROM storage and recovery.
+ * 
+ * Revision 4.3.1 
+ * - Added PCF8574 support for more  buttons.
+ * - Added Step select by menu and direct selection
+ * - Added Band select by direct selection
+ * - Used (char*)F("SOMESTRING") to reduce variablesize (F macro puts string in to flash see : http://playground.arduino.cc/Learning/Memory )
+ * - changed usage of lower case l to upper case L for longs (better reading because lowercase l looks like a 1 in the arduino studio)
+ * 
+ * Revision 4.3.1 
+ * - inital merge 2.0 with 4.3
  */
+
+
+void printMeter()
+{ 
+   int meter_reading = analogRead(ANALOG_SPARE);
+   int meter_char = 0;
+
+  // Serial.println(meter_reading);
+
+  if (meter_reading >= 200) // S9+
+    meter_char = 10;
+  else if (meter_reading >= 140) // S9 
+    meter_char = 9;
+  else if (meter_reading >= 100) // S8 
+    meter_char = 8;
+  else if (meter_reading >= 64) // S7 
+    meter_char = 7;
+ else if (meter_reading >= 38) // S6
+    meter_char = 6;
+ else if (meter_reading >= 32) // S5
+    meter_char = 5;
+ else if (meter_reading >= 16) // S4
+    meter_char = 4;
+ else if (meter_reading >= 8) // S3
+    meter_char = 3;
+ else if (meter_reading >= 4) // S2
+    meter_char = 2;
+  else if (meter_reading >= 2) // S1
+    meter_char = 1;
+   
+  // 16 x 2
+  // last 3 digits are for smeter (S0...S9, S9+ 0..9,10+
+   lcd.setCursor(13, 0);
+   lcd.print('S');
+   lcd.setCursor(14, 0);
+   if (meter_char <= 9)
+   {
+      char output = '0' + (char)meter_char; 
+      lcd.print(output);
+   }
+   else
+     lcd.print('9'); 
+   lcd.setCursor(15, 0);
+   if (meter_char >= 10) 
+     lcd.print('+');
+   else
+     lcd.print(' '); 
+}
 
 
 #define PCF8574_I2C_ADDR 0x38
@@ -75,7 +142,7 @@ void doButtonMenu(int btn){
   else if (btn == BUTTON_4)
     menuStepUp(BUTTON_4);
   else if (btn == BUTTON_5)
-    menuSidebandToggle(BUTTON_5);
+    menuFastStep(BUTTON_5);
   else if (btn == BUTTON_6)
     menuSidebandToggle(BUTTON_6);
   else if (btn == BUTTON_7)
@@ -103,17 +170,20 @@ StepStruct;
 
 // define the stepstruct array
 StepStruct  Steps [] = {
-  { (char *)"10Hz", 10 }, 
-  { (char *)"50Hz", 50 }, 
+  { (char *)" 10Hz", 10 }, 
+  { (char *)" 50Hz", 50 }, 
   { (char *)"100Hz", 100 }, 
   { (char *)"500Hz", 500 }, 
-  { (char *)"1KHz", 1000 }, 
-  { (char *)"5KHz", 5000 }, 
+  { (char *)" 1KHz", 1000 }, 
+  { (char *)" 5KHz", 5000 }, 
   { (char *)"10KHz", 10000 }
 };
 
 int getFrequencyStep() {
-   return Steps[currentFreqStepIndex].Step;
+  if (fastStep)
+    return Steps[currentFreqStepIndex].Step*5;
+  else
+    return Steps[currentFreqStepIndex].Step;
 }
 
 int menuStep(int btn){
@@ -182,6 +252,22 @@ int menuStepDown(int btn){
   if (currentFreqStepIndex > STEPMIN) {
     currentFreqStepIndex--;        
   }
+ 
+  menuOn = 0;
+  updateDisplay(); 
+}
+
+
+int menuFastStep(int btn){
+   
+  while (btnDown(btn))
+    delay(50);
+  delay(50);     
+
+  if (fastStep)
+    fastStep = false;
+  else 
+    fastStep = true;
  
   menuOn = 0;
   updateDisplay(); 

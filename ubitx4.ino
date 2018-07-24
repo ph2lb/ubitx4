@@ -252,6 +252,7 @@ int8_t currentBandIndexVfoA = (int8_t)B40M;
 int8_t currentBandIndexVfoB = (int8_t)B20M;  
 int8_t currentFreqStepIndexVfoA = (int8_t)S100;
 int8_t currentFreqStepIndexVfoB = (int8_t)S100;
+bool fastStep = false;
 
 int8_t currentBandIndex = currentBandIndexVfoA;
 int8_t currentFreqStepIndex = currentFreqStepIndexVfoA;
@@ -720,10 +721,11 @@ void setup()
 
   //we print this line so this shows up even if the raduino 
   //crashes later in the code
-  printLine2(F("uBITX v4.3 PH2LB")); 
+  printLine2(F("uBITX v4.3.3")); 
+  printLine1(F("by PH2LB")); 
   active_delay(1500);
 
-//  initMeter(); //not used in this build
+  //initMeter();  
   initSettings();
   initPorts();     
   initOscillators();
@@ -747,7 +749,7 @@ void setup()
 /**
  * The loop checks for keydown, ptt, function button and tuning.
  */
-
+byte scounter= 0;
 byte flasher = 0;
 void loop(){ 
   
@@ -758,11 +760,18 @@ void loop(){
   checkButtons();
 
   //tune only when not tranmsitting 
-  if (!inTx){
+  if (!inTx)
+  {
     if (ritOn)
       doRIT();
     else 
       doTuning();
+
+    if (scounter-- == 0)
+    {
+      printMeter();
+      scounter = 10;
+    }
   }
   
   //we check CAT after the encoder as it might put the radio into TX
