@@ -157,6 +157,8 @@ int count = 0;          //to generally count ticks, loops, etc
 //values that are stroed for the VFO modes
 #define VFO_MODE_LSB 2
 #define VFO_MODE_USB 3
+#define VFO_MODE_CW 4
+#define VFO_MODE_CWR 5
 
 // handkey, iambic a, iambic b : 0,1,2f
 #define CW_KEY_TYPE 358
@@ -257,7 +259,7 @@ bool fastStep = false;
 int8_t currentBandIndex = currentBandIndexVfoA;
 int8_t currentFreqStepIndex = currentFreqStepIndexVfoA;
 
-char isUsbVfoA=0, isUsbVfoB=1;
+char isUsbVfoA=0, isUsbVfoB=1, isCwVfoA=0, isCwVfoB=0;
 unsigned long frequency, ritRxFrequency, ritTxFrequency;  //frequency is the current frequency on the dial
 unsigned long firstIF =   45000000L;
 
@@ -279,6 +281,7 @@ char splitOn = 0;             //working split, uses VFO B as the transmit freque
 char keyDown = 0;             //in cw mode, denotes the carrier is being transmitted
 char isUSB = 0;               //upper sideband was selected, this is reset to the default for the 
                               //frequency when it crosses the frequency border of 10 MHz
+char isCw = 0;                //indicate that CW mode is selected
 byte menuOn = 0;              //set to 1 when the menu is being displayed, if a menu item sets it to zero, the menu is exited
 unsigned long cwTimeout = 0;  //milliseconds to go before the cw transmit line is released and the radio goes back to rx mode
 unsigned long dbgCount = 0;   //not used now
@@ -631,10 +634,20 @@ void initSettings(){
  
   switch(x){
     case VFO_MODE_USB:
-      isUsbVfoA = 1;
+      isUsbVfoA = 1; 
+      isCwVfoA = 0;
       break;
     case VFO_MODE_LSB:
       isUsbVfoA = 0;
+      isCwVfoA = 0;
+      break;
+    case VFO_MODE_CW:
+      isUsbVfoA = 0; 
+      isCwVfoA = 1;
+      break;
+    case VFO_MODE_CWR:
+      isUsbVfoA = 1;
+      isCwVfoA = 1;
       break;
     default:
       if (vfoA > 10000000L)
@@ -646,10 +659,20 @@ void initSettings(){
   EEPROM.get(VFO_B_MODE, x);
   switch(x){
     case VFO_MODE_USB:
-      isUsbVfoB = 1;
+      isUsbVfoB = 1; 
+      isCwVfoB = 0;
       break;
     case VFO_MODE_LSB:
       isUsbVfoB = 0;
+      isCwVfoB = 0;
+      break;
+    case VFO_MODE_CW:
+      isUsbVfoB = 0; 
+      isCwVfoB = 1;
+      break;
+    case VFO_MODE_CWR:
+      isUsbVfoB = 1;
+      isCwVfoB = 1;
       break;
     default:
       if (vfoA > 10000000L)
@@ -711,6 +734,9 @@ void initPorts(){
 
   pinMode(CW_KEY, OUTPUT);
   digitalWrite(CW_KEY, 0);
+
+  // init PCF8574 output 0x40
+  initMods();
 }
 
 void setup()
@@ -721,7 +747,7 @@ void setup()
 
   //we print this line so this shows up even if the raduino 
   //crashes later in the code
-  printLine2(F("uBITX v4.3.3")); 
+  printLine2(F("uBITX v4.3.5")); 
   printLine1(F("by PH2LB")); 
   active_delay(1500);
 
@@ -733,12 +759,13 @@ void setup()
   vfoActive = VFO_A;
   frequency = vfoA;
   isUSB = isUsbVfoA;
+  isCw = isCwVfoA;
   currentBandIndex = currentBandIndexVfoA;
   currentFreqStepIndex = currentFreqStepIndexVfoA;
       
   setFrequency(frequency);
   setCurrentBandFrequency(frequency);
-   
+  setMods();
   updateDisplay(); 
   
   if (getButton() == BUTTON_HW)

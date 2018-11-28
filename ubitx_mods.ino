@@ -70,8 +70,8 @@ void printMeter()
 }
 
 
-#define PCF8574_I2C_ADDR 0x38
-
+#define PCF8574_BUTTONS_I2C_ADDR 0x38 
+#define PCF8574_OUTPUT_I2C_ADDR 0x39
 
 int btnDown(byte btn){
   byte p = getButton();
@@ -84,8 +84,8 @@ byte getButton() {
   if (hwBtnDown())
      return BUTTON_HW;
 
-#if PCF8574_I2C_ADDR
-  Wire.requestFrom(PCF8574_I2C_ADDR, 1);     
+#if PCF8574_BUTTONS_I2C_ADDR
+  Wire.requestFrom(PCF8574_BUTTONS_I2C_ADDR, 1);     
   byte c = Wire.read();  // receive a byte as character
   byte x = ~c;  // 255 = no buttons pressed
   
@@ -142,19 +142,61 @@ void doButtonMenu(int btn){
   else if (btn == BUTTON_4)
     menuStepUp(BUTTON_4);
   else if (btn == BUTTON_5)
-    menuFastStep(BUTTON_5);
+    menuSidebandUpDown(BUTTON_5);
   else if (btn == BUTTON_6)
-    menuSidebandToggle(BUTTON_6);
+    menuSidebandUpDown(BUTTON_6);
   else if (btn == BUTTON_7)
     menuVfoToggle(BUTTON_7);
   else if (btn == BUTTON_8)
-    menuVfoToggle(BUTTON_8);
+    menuFastStep(BUTTON_8);
   
   while(getButton() == btn)
     delay(50);
   delay(50);
 }
- 
+
+byte setPin(byte current, uint8_t pin, uint8_t value)
+{
+  if (value == LOW) 
+  {
+    current &= ~(1<<pin);
+  }
+  else 
+  {
+    current |= (1<<pin);
+  }
+  return current;
+}
+
+void initMods()
+{
+#if PCF8574_OUTPUT_I2C_ADDR 
+  Wire.beginTransmission(PCF8574_OUTPUT_I2C_ADDR);
+  Wire.write(0);
+  Wire.endTransmission();   
+#endif
+}
+
+void setMods()
+{
+  // do fancy stuff like setting cwFilter active 
+  Serial.println("setMods");        
+  Serial.print("isCw = ");         
+  Serial.println((int)isCw);     
+  
+#if PCF8574_OUTPUT_I2C_ADDR
+  Wire.requestFrom(PCF8574_OUTPUT_I2C_ADDR, 1);     
+  byte current = Wire.read();  // receive a byte as character
+
+  // pin D0 = 1 > CW filer active
+  byte data = setPin(current, 7, (uint8_t)isCw);
+
+  Wire.beginTransmission(PCF8574_OUTPUT_I2C_ADDR);
+  Wire.write(data);
+  Wire.endTransmission();   
+#endif
+      
+}
  
  /*
  * by PH2LB : Simple step menu 
@@ -228,6 +270,70 @@ int menuStep(int btn){
   updateDisplay(); 
 }
 
+void menuSidebandUpDown(int btn){
+
+  if (btn == BUTTON_6)
+  {
+    if (isUSB == true && isCw == false) // USB > LSB
+    {
+       isUSB = false;
+       isCw = false;
+    }
+    else if (isUSB == false && isCw == false) // LSB > CW
+     {
+       isUSB = false;
+       isCw = true;
+    }
+    else if (isUSB == false && isCw == true) // CW > CWR
+    {
+       isUSB = true;
+       isCw = true;
+    }
+    else if (isUSB == true && isCw == true) // CWR > USB
+    {
+       isUSB = true;
+       isCw = false;
+    }
+  }
+  else
+  {
+     if (isUSB == true && isCw == false) // USB > CWR
+    {
+       isUSB = true;
+       isCw = true;
+    }
+    else if (isUSB == true && isCw == true) // CWR > CW
+    {
+       isUSB = false;
+       isCw = true;
+    }
+    else if (isUSB == false && isCw == true) // CW > LSB
+    {
+       isUSB = false;
+       isCw = false;
+    }
+    else if (isUSB == false && isCw == false) // LSB > USB
+    {
+       isUSB = true;
+       isCw = false;
+    }
+  }
+  
+  //Added by KD8CEC
+  if (vfoActive == VFO_B){
+    isUsbVfoB = isUSB;
+    isCwVfoB = isCw;
+  }
+  else {
+    isUsbVfoA = isUSB; 
+    isCwVfoA = isCw;
+  }
+  setMods();
+  setFrequency(frequency);
+  setCurrentBandFrequency(frequency);
+  updateDisplay();  
+} 
+ 
 int menuStepUp(int btn){
    
   while (btnDown(btn))

@@ -140,10 +140,22 @@ void updateDisplay() {
     if (ritOn)
       strcpy(c, "RIT ");
     else {
-      if (isUSB)
+      if (isUSB == 1 && isCw == 0)
+      {
         strcpy_P(c, (char *)F("USB "));
-      else
+      }
+      else if (isUSB == 0 && isCw == 0)
+      {
         strcpy_P(c, (char *)F("LSB "));
+      }
+      else if (isUSB == 0 && isCw == 1)
+      {
+        strcpy_P(c, (char *)F("CW  "));
+      }
+      else if (isUSB == 01 && isCw == 1)
+      {
+        strcpy_P(c, (char *)F("CWR "));
+      }
     }
     if (vfoActive == VFO_A) // VFO A is active
       strcat_P(c, (char *)F("A:"));

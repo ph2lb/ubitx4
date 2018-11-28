@@ -153,16 +153,21 @@ void menuVfoToggle(int btn){
     if (vfoActive == VFO_B){
       vfoB = frequency;
       isUsbVfoB = isUSB;
+      isCwVfoB = isCw;
       currentBandIndexVfoB = currentBandIndex;
       currentFreqStepIndexVfoB = currentFreqStepIndex;
 
       // write storage
       EEPROM.put(VFO_B, frequency);
-      if (isUsbVfoB)
+      if (isUsbVfoB && isCwVfoB == 0)
         EEPROM.put(VFO_B_MODE, VFO_MODE_USB);
-      else
+      else  if (isUsbVfoB == 0 && isCwVfoB == 0)
         EEPROM.put(VFO_B_MODE, VFO_MODE_LSB);
-
+      else  if (isUsbVfoB == 0 && isCwVfoB == 1)
+        EEPROM.put(VFO_B_MODE, VFO_MODE_CW);
+      else  if (isUsbVfoB == 1 && isCwVfoB == 1)
+        EEPROM.put(VFO_B_MODE, VFO_MODE_CWR);
+        
       // new by PH2LB
       EEPROM.put(VFO_B_BAND, currentBandIndexVfoB);
       EEPROM.put(VFO_B_STEP, currentFreqStepIndexVfoB);
@@ -170,6 +175,7 @@ void menuVfoToggle(int btn){
       vfoActive = VFO_A;
       frequency = vfoA;
       isUSB = isUsbVfoA;
+      isCw = isCwVfoA;
 
       // new by PH2LB
       currentBandIndex = currentBandIndexVfoA;
@@ -181,10 +187,14 @@ void menuVfoToggle(int btn){
       currentBandIndexVfoA = currentBandIndex;
       currentFreqStepIndexVfoA = currentFreqStepIndex;
       EEPROM.put(VFO_A, frequency);
-      if (isUsbVfoA)
+      if (isUsbVfoA && isCwVfoA == 0)
         EEPROM.put(VFO_A_MODE, VFO_MODE_USB);
-      else
+      else  if (isUsbVfoA == 0 && isCwVfoA == 0)
         EEPROM.put(VFO_A_MODE, VFO_MODE_LSB);
+      else  if (isUsbVfoA == 0 && isCwVfoA == 1)
+        EEPROM.put(VFO_A_MODE, VFO_MODE_CW);
+      else  if (isUsbVfoA == 1 && isCwVfoA == 1)
+        EEPROM.put(VFO_A_MODE, VFO_MODE_CWR);
 
       // new by PH2LB
       EEPROM.put(VFO_A_BAND, currentBandIndexVfoA);
@@ -193,6 +203,7 @@ void menuVfoToggle(int btn){
       vfoActive = VFO_B;
       frequency = vfoB;
       isUSB = isUsbVfoB;
+      isCw = isCwVfoB;
 
        // new by PH2LB
       currentBandIndex = currentBandIndexVfoB;
@@ -202,6 +213,7 @@ void menuVfoToggle(int btn){
     ritDisable();
     setFrequency(frequency);
     setCurrentBandFrequency(frequency);
+    setMods();
     updateDisplay(); 
     menuOn = 0;
   }
@@ -210,31 +222,49 @@ void menuVfoToggle(int btn){
 // Menu #4
 void menuSidebandToggle(int btn){
   if (!btn){
-    if (isUSB == true)
+    if (isUSB == true && isCw == false) // USB > LSB
       printLine2(F("USB \x7E LSB"));
-    else
-      printLine2(F("LSB \x7E USB"));
+    else if (isUSB == false && isCw == false) // LSB > CW
+      printLine2(F("LSB \x7E CW"));
+    else if (isUSB == false && isCw == true) // CW > CWR
+      printLine2(F("CW \x7E CWR"));
+    else if (isUSB == true && isCw == true) // CWR > USB
+      printLine2(F("CWR \x7E USB"));
   }
   else {
-    if (isUSB == true){
-      isUSB = false;
-//      printLine2(F("LSB Selected"));
-//      active_delay(500);
-//      printLine2(F("");
+    if (isUSB == true && isCw == false) // USB > LSB
+    {
+       isUSB = false;
+       isCw = false;
     }
-    else {
-      isUSB = true;
-//      printLine2(F("USB Selected"));
-//      active_delay(500);
-//      printLine2(F(""));
+    else if (isUSB == false && isCw == false) // LSB > CW
+     {
+       isUSB = false;
+       isCw = true;
     }
+    else if (isUSB == false && isCw == true) // CW > CWR
+    {
+       isUSB = true;
+       isCw = true;
+    }
+    else if (isUSB == true && isCw == true) // CWR > USB
+    {
+       isUSB = true;
+       isCw = false;
+    }
+    
     //Added by KD8CEC
     if (vfoActive == VFO_B){
       isUsbVfoB = isUSB;
+      isCwVfoB = isCw;
     }
     else {
-      isUsbVfoB = isUSB;
+      isUsbVfoA = isUSB; 
+      isCwVfoA = isCw;
     }
+    setMods();
+    setFrequency(frequency);
+    setCurrentBandFrequency(frequency);
     updateDisplay();
     menuOn = 0;
   }
