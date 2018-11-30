@@ -180,10 +180,7 @@ void initMods()
 void setMods()
 {
   // do fancy stuff like setting cwFilter active 
-  Serial.println("setMods");        
-  Serial.print("isCw = ");         
-  Serial.println((int)isCw);     
-  
+ 
 #if PCF8574_OUTPUT_I2C_ADDR
   Wire.requestFrom(PCF8574_OUTPUT_I2C_ADDR, 1);     
   byte current = Wire.read();  // receive a byte as character

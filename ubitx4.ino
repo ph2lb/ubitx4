@@ -742,12 +742,13 @@ void initPorts(){
 void setup()
 {
   Serial.begin(38400);
+  // Serial.begin(9600);
   Serial.flush();  
   lcd.begin(16, 2);
 
   //we print this line so this shows up even if the raduino 
   //crashes later in the code
-  printLine2(F("uBITX v4.3.5")); 
+  printLine2(F("uBITX v4.3.6")); 
   printLine1(F("by PH2LB")); 
   active_delay(1500);
 

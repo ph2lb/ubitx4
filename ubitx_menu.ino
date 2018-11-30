@@ -305,10 +305,10 @@ int menuCWSpeed(int btn){
     wpm = 1200/cwSpeed;
      
     if (!btn){
-     strcpy(b, (char *)F("CW: "));
+     strcpy_P(b, (char *)F("CW: "));
      itoa(wpm,c, 10);
-     strcat(b, c);
-     strcat(b, (char *)F(" WPM     \x7E"));
+     strcat_P(b, c);
+     strcat_P(b, (char *)F(" WPM     \x7E"));
      printLine2(b);
      return;
     }

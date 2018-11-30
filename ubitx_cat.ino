@@ -277,39 +277,57 @@ void processCATCommand2(byte* cmd) {
     updateDisplay();
     response[0]=0;
     Serial.write(response, 1);
-    //sprintf(b, "set:%ld", f); 
-    //printLine2(b);
     break;
 
   case 0x02:
     //split on 
     splitOn =  1;
+    updateDisplay();
     break;
   case 0x82:
     //split off
     splitOn = 0;
+    updateDisplay();
     break;
-    
   case 0x03:
     writeFreq(frequency,response); // Put the frequency into the buffer
-    if (isUSB)
-      response[4] = 0x01; //USB
+    if (isUSB && !isCw)
+      response[4] = 0x01; // USB
+    else if (isUSB && isCw)
+      response[4] = 0x03; // CWR
+    if (!isUSB && !isCw)
+      response[4] = 0x02; // CW
     else
-      response[4] = 0x00; //LSB
-    Serial.write(response,5);
-    //printLine2("cat:getfreq");
+      response[4] = 0x00; // LSB
+    Serial.write(response,5); 
     break;
     
   case 0x07: // set mode
-    if (cmd[0] == 0x00 || cmd[0] == 0x03)
-      isUSB = 0;
-    else
+    if (cmd[0] == 0x01)
+    {
       isUSB = 1;
+      isCw = 0;
+    }
+    else if (cmd[0] == 0x02)
+    {
+      isUSB = 0;
+      isCw = 1;
+    }
+    else if (cmd[0] == 0x03)
+    {
+      isUSB = 1;
+      isCw = 1;
+    }
+    else 
+    {
+      isUSB = 0;
+      isCw = 0;
+    }
+    
     response[0] = 0x00;
     Serial.write(response, 1);
-    setFrequency(frequency);
-      //printLine2("cat: mode changed");
-    //updateDisplay();
+    setFrequency(frequency); 
+    updateDisplay();
     break;   
  
   case 0x08: // PTT On
