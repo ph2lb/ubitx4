@@ -2,7 +2,7 @@ PH2LB's playground for the : uBITX V4 firmware, written for the Raduino/Arduino 
 
 My project info + mods : www.ph2lb.nl/blog/index.php?page=ubitx-mods
 
-Copyright (C) 2017-2018, Ashhar Farhan
+Copyright (C) 2017-2020, Ashhar Farhan
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
