@@ -363,7 +363,7 @@ void setTXFilters(unsigned long freq){
 void setFrequency(unsigned long f){
   uint64_t osc_f, firstOscillator, secondOscillator;
  
-  setTXFilters(f);
+  setTXFilters(f); 
 
   if (isUSB){
     si5351bx_setfreq(2, firstIF  + f);
@@ -748,7 +748,7 @@ void setup()
 
   //we print this line so this shows up even if the raduino 
   //crashes later in the code
-  printLine2(F("uBITX v4.3.6")); 
+  printLine2(F("uBITX v4.3.7")); 
   printLine1(F("by PH2LB")); 
   active_delay(1500);
 

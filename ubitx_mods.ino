@@ -407,7 +407,7 @@ BandStruct  Bands [] =
   { (char *)"15M", (uint32_t)21000e3, (uint32_t)21450e3, (uint32_t)21225e3 },
   { (char *)"12M", (uint32_t)24890e3, (uint32_t)24990e3, (uint32_t)24890e3 },  
   { (char *)"10M", (uint32_t)28000e3, (uint32_t)29700e3, (uint32_t)28225e3 },
-  { (char *)"FUL", (uint32_t)3500e3,  (uint32_t)29700e3, (uint32_t)14200e3 },
+  { (char *)"FUL", (uint32_t)1000e3,  (uint32_t)29700e3, (uint32_t)14200e3 },
 };
 
 long getFrequencyUpperLimit() {
@@ -420,6 +420,18 @@ long getFrequencyLowerLimit() {
 
 void setCurrentBandFrequency(long frequency) {
   Bands[currentBandIndex].Freq = (uint32_t)frequency;
+}
+
+void setBandForFrequency(long frequency) {
+  for(int idx=0; idx<=BANDMAX; idx++) {
+    // check if frequency is between lowerlimit and upperlimit of the band
+    if (frequency >= Bands[idx].FreqLowerLimit && frequency <= Bands[idx].FreqUpperLimit) {
+      // found it
+      currentBandIndex = idx;
+      break;
+    }
+  }
+  setCurrentBandFrequency(frequency);
 }
 
 int menuBandUp(int btn){

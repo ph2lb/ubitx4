@@ -273,6 +273,7 @@ void processCATCommand2(byte* cmd) {
   case 0x01:
     //set frequency
     f = readFreq(cmd);
+    setBandForFrequency(f);
     setFrequency(f);   
     updateDisplay();
     response[0]=0;
@@ -326,6 +327,7 @@ void processCATCommand2(byte* cmd) {
     
     response[0] = 0x00;
     Serial.write(response, 1);
+    setBandForFrequency(frequency);
     setFrequency(frequency); 
     updateDisplay();
     break;   
